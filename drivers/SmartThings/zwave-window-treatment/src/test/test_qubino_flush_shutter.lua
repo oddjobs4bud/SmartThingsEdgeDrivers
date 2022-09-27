@@ -77,8 +77,8 @@ test.register_message_test(
         mock_qubino_flush_shutter.id,
         zw_test_utils.zwave_test_build_receive_command(
             SwitchMultilevel:Report({
-            current_value = 0,
-            target_value = SwitchMultilevel.value.OFF_DISABLE,
+            target_value = 0,
+            current_value = SwitchMultilevel.value.OFF_DISABLE,
             duration = 0
           })
         )
@@ -107,8 +107,8 @@ test.register_message_test(
         mock_qubino_flush_shutter.id,
         zw_test_utils.zwave_test_build_receive_command(
           SwitchMultilevel:Report({
-            current_value = 0,
-            target_value = 50,
+            target_value = 0,
+            current_value = 50,
             duration = 0
           })
         )
@@ -137,8 +137,8 @@ test.register_message_test(
         mock_qubino_flush_shutter.id,
         zw_test_utils.zwave_test_build_receive_command(
           SwitchMultilevel:Report({
-            current_value = 0,
-            target_value = 99,
+            target_value = 0,
+            current_value = 99,
             duration = 0
           })
         )
@@ -307,8 +307,8 @@ test.register_message_test(
         mock_qubino_flush_shutter_venetian.id,
         zw_test_utils.zwave_test_build_receive_command(
           SwitchMultilevel:Report({
-            current_value = 0,
-            target_value = 50,
+            target_value = 0,
+            current_value = 50,
             duration = 0
           },{encap = zw.ENCAP.AUTO, src_channel = 2, dst_channels = {0}})
         )
