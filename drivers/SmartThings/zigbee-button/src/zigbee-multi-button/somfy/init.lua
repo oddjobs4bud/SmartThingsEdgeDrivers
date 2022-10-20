@@ -22,6 +22,7 @@ local function zdo_binding_table_handler(driver, device, zb_rx)
       return
     end
   end
+  driver:add_hub_to_zigbee_group(0x0000) -- fallback if no binding table entries found
 end
 
 local somfy = {
