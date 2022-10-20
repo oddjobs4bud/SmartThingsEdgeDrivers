@@ -149,4 +149,27 @@ test.register_coroutine_test(
   end
 )
 
+test.register_coroutine_test(
+  "ZDO Message handler and adding hub to group",
+  function()
+    local response = mgmt_bind_response.MgmtBindResponse({
+      status = 0x00,
+      total_binding_table_entry_count = 0x00,
+      start_index = 0x00,
+      binding_table_list_count = 0x00,
+      binding_table_entries = {  }
+    })
+    test.socket.zigbee:__queue_receive(
+      {
+        mock_device.id,
+        zigbee_test_utils.build_zdo_mgmt_bind_response(mock_device, response)
+      }
+    )
+    test.socket.zigbee:__expect_add_hub_to_group(0x0000)
+    test.socket.zigbee:__expect_send({mock_device.id,
+      Groups.commands.AddGroup(mock_device, 0x0000, "00")
+    })
+  end
+)
+
 test.run_registered_tests()
