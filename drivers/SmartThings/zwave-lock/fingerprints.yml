@@ -303,3 +303,9 @@ zwaveGeneric:
         - 0x62 # door lock
         - 0x80 # battery
     deviceProfileName: lock-battery
+ - id: "Ultraloq"
+    deviceLabel: Ultraloq U-Bolt Pro Z-Wave Smart Lock
+    manufacturerId: 0x0452
+    productType: 0x0004
+    productId: 0x0001
+    deviceProfileName: Lock
