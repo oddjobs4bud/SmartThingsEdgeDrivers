@@ -75,7 +75,7 @@ local function set_color(driver, device, cmd)
     device:send(Configuration:Get({ parameter_number=LED_COLOR_CONTROL_PARAMETER_NUMBER }))
   end
 
-  device.thread:call_with_delay(constants.DEFAULT_GET_STATUS_DELAY + constants.DEFAULT_DIMMING_DURATION, query_configuration)
+  device.thread:call_with_delay(constants.DEFAULT_GET_STATUS_DELAY, query_configuration)
 end
 
 local function can_handle_inovelli_led(opts, driver, device, ...)
@@ -84,7 +84,8 @@ local function can_handle_inovelli_led(opts, driver, device, ...)
     {INOVELLI_LZW31SN_PRODUCT_TYPE, INOVELLI_LZW31_PRODUCT_TYPE},
     INOVELLI_DIMMER_PRODUCT_ID
   ) then
-    return true
+    local subdriver = require("inovelli-LED")
+    return true, subdriver
   end
   return false
 end

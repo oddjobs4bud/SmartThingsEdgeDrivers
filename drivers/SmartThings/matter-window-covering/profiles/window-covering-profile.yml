@@ -1,3 +1,4 @@
+# deprecated - please use window-covering-battery instead
 name: window-covering-profile
 components:
 - id: main
@@ -9,6 +10,8 @@ components:
   - id: windowShadeLevel
     version: 1
   - id: battery
+    version: 1
+  - id: firmwareUpdate
     version: 1
   - id: refresh
     version: 1

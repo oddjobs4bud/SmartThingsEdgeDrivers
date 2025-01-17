@@ -24,6 +24,7 @@ local SwitchBinary = (require "st.zwave.CommandClass.SwitchBinary")({ version = 
 --- @type st.zwave.CommandClass.Meter
 local Meter = (require "st.zwave.CommandClass.Meter")({ version = 3 })
 local dualSwitchConfigurationsMap = require "zwave-dual-switch/dual_switch_configurations"
+local utils = require "st.utils"
 
 local ZWAVE_DUAL_SWITCH_FINGERPRINTS = {
   { mfr = 0x0086, prod = 0x0103, model = 0x008C }, -- Aeotec Switch 1
@@ -40,7 +41,8 @@ local ZWAVE_DUAL_SWITCH_FINGERPRINTS = {
 local function can_handle_zwave_dual_switch(opts, driver, device, ...)
   for _, fingerprint in ipairs(ZWAVE_DUAL_SWITCH_FINGERPRINTS) do
     if device:id_match(fingerprint.mfr, fingerprint.prod, fingerprint.model) then
-      return true
+      local subdriver = require("zwave-dual-switch")
+      return true, subdriver
     end
   end
   return false
@@ -66,7 +68,8 @@ local function device_added(driver, device)
   if device.network_type ~= st_device.NETWORK_TYPE_CHILD then
     local dual_switch_configuration = dualSwitchConfigurationsMap.get_child_device_configuration(device)
 
-    if dual_switch_configuration ~= nil then
+    if not (device.child_ids and utils.table_size(device.child_ids) ~= 0) and --migration case will have non-zero
+      (dual_switch_configuration ~= nil and find_child(device, 2) == nil) then
       local name = generate_child_name(device.label)
       local childDeviceProfile = dual_switch_configuration.child_switch_device_profile
       local metadata = {
@@ -102,15 +105,30 @@ local function basic_set_handler(driver, device, cmd)
 end
 
 local function do_refresh(driver, device, command)
+  local component = command and command.component and command.component or "main"
   if device:is_cc_supported(cc.SWITCH_BINARY) then
-    device:send_to_component(SwitchBinary:Get({}), command.component)
+    device:send_to_component(SwitchBinary:Get({}), component)
   elseif device:is_cc_supported(cc.BASIC) then
-    device:send_to_component(Basic:Get({}), command.component)
+    device:send_to_component(Basic:Get({}), component)
   end
   if device:supports_capability_by_id(capabilities.powerMeter.ID) or device:supports_capability_by_id(capabilities.energyMeter.ID) then
-    device:send_to_component(Meter:Get({ scale = Meter.scale.electric_meter.WATTS }), command.component)
-    device:send_to_component(Meter:Get({ scale = Meter.scale.electric_meter.KILOWATT_HOURS }), command.component)
+    device:send_to_component(Meter:Get({ scale = Meter.scale.electric_meter.WATTS }), component)
+    device:send_to_component(Meter:Get({ scale = Meter.scale.electric_meter.KILOWATT_HOURS }), component)
   end
+end
+
+-- Do not use native handlers due to unique component to endpoint mapping
+local function switch_on_handler(driver, device, cmd)
+  switch_defaults.capability_handlers[capabilities.switch.commands.on](driver, device, cmd, false)
+end
+
+local function switch_off_handler(driver, device, cmd)
+  switch_defaults.capability_handlers[capabilities.switch.commands.off](driver, device, cmd, false)
+end
+
+local function set_level_handler(driver, device, cmd)
+  local defaults = require "st.zwave.defaults.switchLevel"
+  defaults.capability_handlers[capabilities.switchLevel.commands.setLevel](driver, device, cmd, false)
 end
 
 local function switch_report(driver, device, cmd)
@@ -135,7 +153,14 @@ local zwave_dual_switch = {
   capability_handlers = {
     [capabilities.refresh.ID] = {
       [capabilities.refresh.commands.refresh.NAME] = do_refresh
-    }
+    },
+    [capabilities.switch.ID] = {
+      [capabilities.switch.commands.on.NAME] = switch_on_handler,
+      [capabilities.switch.commands.off.NAME] = switch_off_handler,
+    },
+    [capabilities.switchLevel.ID] = {
+      [capabilities.switchLevel.commands.setLevel.NAME] = set_level_handler,
+    },
   },
   lifecycle_handlers = {
     added = device_added,

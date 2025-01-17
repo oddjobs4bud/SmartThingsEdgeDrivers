@@ -19,8 +19,6 @@ local cc = require "st.zwave.CommandClass"
 local utils = require "st.utils"
 --- @type st.zwave.CommandClass.Basic
 local Basic = (require "st.zwave.CommandClass.Basic")({ version = 1 })
---- @type st.zwave.CommandClass.Configuration
-local Configuration = (require "st.zwave.CommandClass.Configuration")({ version = 1 })
 --- @type st.zwave.CommandClass.Meter
 local Meter = (require "st.zwave.CommandClass.Meter")({ version = 3 })
 --- @type st.zwave.CommandClass.SwitchBinary
@@ -42,7 +40,8 @@ local POWER_UNIT_WATT = "W"
 local function can_handle_aeon_smart_strip(opts, driver, device, ...)
   for _, fingerprint in ipairs(AEON_SMART_STRIP_FINGERPRINTS) do
     if device:id_match(fingerprint.mfr, fingerprint.prod, fingerprint.model) then
-      return true
+      local subdriver = require("aeon-smart-strip")
+      return true, subdriver
     end
   end
   return false

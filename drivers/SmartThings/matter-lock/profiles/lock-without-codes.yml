@@ -4,9 +4,18 @@ components:
   capabilities:
   - id: lock
     version: 1
+    config:
+      values:
+      - key: "lock.value"
+        enabledValues:
+        - locked
+        - unlocked
+        - not fully locked
   - id: battery
     version: 1
   - id: tamperAlert
+    version: 1
+  - id: firmwareUpdate
     version: 1
   - id: refresh
     version: 1
